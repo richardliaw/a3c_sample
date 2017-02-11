@@ -62,7 +62,6 @@ class ActorCritic(TFModel):
                 weights_initializer=tf.contrib.layers.xavier_initializer())
 
         # op to sample an action - multinomial takes unnormalized log probs
-        # self.logits = tf.Print(self.logits, [self.logits], "self.Logits - ")
         self._sample = tf.reshape(tf.multinomial(self.logits, 1), [])
 
 
@@ -78,7 +77,6 @@ class ActorCritic(TFModel):
         policy_loss = -(tf.reduce_mean(tf.mul(act_prob, self._advantages)) 
                                         + hparams['entropy_wt'] * entropy)
 
-
         # Value Function Loss
         self._discounted_rwds = tf.placeholder(tf.float32)
         v = tf.reshape(self._value, [-1]) - self._discounted_rwds
@@ -92,7 +90,6 @@ class ActorCritic(TFModel):
         with self.g.as_default():
             self.variables = ray.experimental.TensorFlowVariables(self.loss, self._s)   
         self._s.run(self.initializer)
-        # self.variables = ray.experimental.TensorFlowVariables(self.loss, self._s, prefix=True)
         self.g.finalize()
         self.debug_info = defaultdict(list)
 
