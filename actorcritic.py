@@ -1,3 +1,6 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
 import gym
 import numpy as np
@@ -32,8 +35,8 @@ class ActorCritic(TFModel):
             self.grads_vars = self.optimizer.compute_gradients(self.loss)
             self._apply_gradients = self.optimizer.apply_gradients(self.grads_vars)
             self.initializer = tf.global_variables_initializer()
-            print "AC Model took %f seconds to load..." % (time.time() - start)
-        
+            print("AC Model took %f seconds to load..." % (time.time() - start))
+
         self.start()
 
     def setup_graph(self, hparams):
@@ -75,7 +78,7 @@ class ActorCritic(TFModel):
         indices = tf.range(0, tf.shape(log_prob)[0]) * tf.shape(log_prob)[1] + self._acts
         act_prob = tf.gather(tf.reshape(log_prob, [-1]), indices)#this is negative
         entropy = -tf.reduce_mean(tf.mul(tf.nn.softmax(self.logits), log_prob))
-        policy_loss = -(tf.reduce_mean(tf.mul(act_prob, self._advantages)) 
+        policy_loss = -(tf.reduce_mean(tf.mul(act_prob, self._advantages))
                                         + hparams['entropy_wt'] * entropy)
 
 
@@ -90,7 +93,7 @@ class ActorCritic(TFModel):
     def start(self):
         self._s = tf.Session(graph=self.g)
         with self.g.as_default():
-            self.variables = ray.experimental.TensorFlowVariables(self.loss, self._s)   
+            self.variables = ray.experimental.TensorFlowVariables(self.loss, self._s)
         self._s.run(self.initializer)
         # self.variables = ray.experimental.TensorFlowVariables(self.loss, self._s, prefix=True)
         self.g.finalize()
@@ -123,7 +126,7 @@ class ActorCritic(TFModel):
         return self._s.run([g[0] for g in self.grads_vars], feed_dict=batch_feed)
 
     def model_update(self, grads):
-        feed_dict = {self.grads_vars[i][0]: grads[i] 
+        feed_dict = {self.grads_vars[i][0]: grads[i]
                             for i in range(len(grads))}
         self._s.run(self._apply_gradients, feed_dict=feed_dict)
 

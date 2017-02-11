@@ -1,3 +1,7 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import numpy as np
 import tensorflow as tf
 
@@ -75,7 +79,7 @@ def policy_continue(env, agent, steps, horizon=None,  show=False):
     if hasattr(env, "state"):
         observation = env.state
     else:
-        print "Resetting..."
+        print("Resetting...")
         observation = env.reset()
 
 
@@ -88,7 +92,7 @@ def policy_continue(env, agent, steps, horizon=None,  show=False):
         if show: env.render()
 
         acts.append(action)
-        rews.append(reward)        
+        rews.append(reward)
         if done:
             observation = env.reset()
             break

@@ -1,3 +1,7 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import gym
 import numpy as np
 import tensorflow as tf
@@ -21,7 +25,7 @@ ray.env.env = ray.EnvironmentVariable(env_init, env_reinit)
 
 def ac_init():
     env = ray.env.env
-    print env.action_space.n
+    print(env.action_space.n)
     hparams = {
             'input_size': env.observation_space.shape[0],
             'hidden_size': 64,
@@ -56,7 +60,7 @@ def a3c_rollout_grad(params, avg_rwd):
 
     rewards = []
     for r in reversed(rews):
-        cur_rwd = r + GAMMA * cur_rwd 
+        cur_rwd = r + GAMMA * cur_rwd
         rewards.insert(0, cur_rwd)
     rewards = np.asarray(rewards)
     # if any(estimated_values == np.nan):
@@ -88,7 +92,7 @@ def train(u_itr=5000):
     while cur_itr < u_itr:
         params['weights'] = actor_critic.get_weights()
         # if any([(np.isnan(i)).any() for i in params['weights'].values()]):
-        
+
         param_id = ray.put(params)
 
         jobs = NUM_WORKERS - len(remaining)
@@ -113,13 +117,13 @@ def train(u_itr=5000):
 
         if cur_itr % 500 == 0:
             testbed = gym.make('CartPole-v0')
-            print "%d: Avg Reward - %f" % (cur_itr, evaluate_policy(testbed, actor_critic))
+            print("%d: Avg Reward - %f" % (cur_itr, evaluate_policy(testbed, actor_critic)))
             c_val = np.asarray(discounted_cumsum(rwds, GAMMA))
             c_est = actor_critic.get_value(obs).flatten()
-            print "%d: Critic Loss - total: %f \t avg: %f \t most: %f" % (cur_itr, 
-                sq_loss(c_val, c_est), 
-                sq_loss(c_val, c_est) / len(c_val), 
-                sq_loss(c_val[:-10], c_est[:-10]) / (len(c_val) - 10 + 1e-2))
+            print("%d: Critic Loss - total: %f \t avg: %f \t most: %f" % (cur_itr,
+                sq_loss(c_val, c_est),
+                sq_loss(c_val, c_est) / len(c_val),
+                sq_loss(c_val[:-10], c_est[:-10]) / (len(c_val) - 10 + 1e-2)))
             # print np.vstack([c_val, c_est]).T
             # TODO: Get average Value Fn fit
             cur_itr += 1
