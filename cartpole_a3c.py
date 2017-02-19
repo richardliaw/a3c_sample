@@ -72,8 +72,6 @@ def train(u_itr=5000):
 
     while cur_itr < u_itr:
         params['weights'] = actor_critic.get_weights()
-        param_id = ray.put(params)
-
         jobs = NUM_WORKERS - len(remaining)
         remaining.extend([a3c_rollout_grad.remote(params) for i in range(jobs)])
         result, remaining = ray.wait(remaining)
@@ -83,7 +81,7 @@ def train(u_itr=5000):
         obs.extend(info["obs"])
         cur_itr += int(info["done"])
 
-        if cur_itr % 500 == 0:
+        if cur_itr % 100 == 0:
             testbed = gym.make('CartPole-v0')
             print "%d: Avg Reward - %f" % (cur_itr, evaluate_policy(testbed, actor_critic))
             c_val = np.asarray(discounted_cumsum(rwds, GAMMA))
